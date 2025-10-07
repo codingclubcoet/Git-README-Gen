@@ -5,6 +5,8 @@ import SocialLinksForm from './components/SocialLinksForm';
 import SkillsForm from './components/SkillsForm';
 import GithubStatsForm from './components/GithubStatsForm';
 import ReadmePreview from './components/ReadmePreview';
+import LanguageSelector from './components/LanguageSelector';
+import MultiLanguageReadme from './components/MultiLanguageReadme';
 import { Toaster, toast } from 'react-hot-toast';
 import './App.css';
 
@@ -33,6 +35,8 @@ function App() {
   const [readme, setReadme] = useState('');
   const [activeTab, setActiveTab] = useState('basic');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [isTranslating, setIsTranslating] = useState(false);
 
   const skillsList = [
     'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'Go', 'Rust',
@@ -62,6 +66,30 @@ function App() {
         ? prev.skills.filter(s => s !== skill)
         : [...prev.skills, skill]
     }));
+  };
+
+  // Simple translation function
+  const handleTranslate = async (targetLanguage) => {
+    if (!readme) return;
+    
+    setIsTranslating(true);
+    try {
+      const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(readme)}&langpair=en|${targetLanguage}`);
+      const data = await response.json();
+      
+      if (data.responseData && data.responseData.translatedText) {
+        setReadme(data.responseData.translatedText);
+        toast.success('README translated successfully!');
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      toast.error('Translation failed. Please try again.');
+    }
+    setIsTranslating(false);
+  };
+
+  const handleReadmeUpdate = (newReadme) => {
+    setReadme(newReadme);
   };
 
   const generateReadme = async () => {
@@ -208,17 +236,28 @@ function App() {
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 backdrop-blur-xl border-b border-white/10">
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
         <div className="container mx-auto px-4 py-8 relative">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
-              <span className="text-2xl">🚀</span>
+          <div className="flex flex-col lg:flex-row items-center justify-between">
+            <div className="text-center lg:text-left mb-6 lg:mb-0">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
+                <span className="text-2xl">🚀</span>
+              </div>
+              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-3">
+                GitHub README Generator
+              </h1>
+              <p className="text-lg lg:text-xl text-slate-300 max-w-2xl leading-relaxed">
+                Craft your perfect GitHub profile README with our intuitive generator.
+                <span className="block text-slate-400 text-base lg:text-lg mt-2">Stand out from the crowd in minutes! ✨</span>
+              </p>
             </div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
-              GitHub README Generator
-            </h1>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Craft your perfect GitHub profile README with our intuitive generator.
-              <span className="block text-slate-400 text-lg mt-2">Stand out from the crowd in minutes! ✨</span>
-            </p>
+            
+            {/* Language Selector */}
+            <LanguageSelector
+              currentLanguage={currentLanguage}
+              onLanguageChange={setCurrentLanguage}
+              onTranslate={handleTranslate}
+              readme={readme}
+              isTranslating={isTranslating}
+            />
           </div>
         </div>
       </div>
@@ -227,6 +266,14 @@ function App() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Column - Form */}
           <div className="space-y-6">
+            {/* Multi-language Component */}
+            {readme && (
+              <MultiLanguageReadme
+                readme={readme}
+                onReadmeUpdate={handleReadmeUpdate}
+              />
+            )}
+
             {/* Enhanced Tab Navigation */}
             <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-slate-700/50 p-2">
               <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
@@ -234,10 +281,11 @@ function App() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
+                    className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap flex-shrink-0 ${
+                      activeTab === tab.id
                         ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
-                      }`}
+                    }`}
                   >
                     <span className="mr-2 text-sm">{tab.icon}</span>
                     <span className="text-sm font-medium">{tab.label}</span>
@@ -291,8 +339,9 @@ function App() {
             <button
               onClick={generateReadme}
               disabled={isGenerating}
-              className={`w-full bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white font-bold py-5 px-6 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${isGenerating ? 'animate-pulse' : ''
-                }`}
+              className={`w-full bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white font-bold py-5 px-6 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                isGenerating ? 'animate-pulse' : ''
+              }`}
             >
               {isGenerating ? (
                 <div className="flex items-center justify-center space-x-3">
@@ -315,6 +364,7 @@ function App() {
               readme={readme}
               copyToClipboard={copyToClipboard}
               downloadReadme={downloadReadme}
+              currentLanguage={currentLanguage}
             />
           </div>
         </div>
@@ -325,7 +375,7 @@ function App() {
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-slate-500 text-sm">
             Made with ❤️ for the developer community •
-            <span className="text-blue-400 ml-1">GitHub README Generator v1.0</span>
+            <span className="text-blue-400 ml-1">GitHub README Generator v2.0</span>
           </div>
         </div>
       </div>
