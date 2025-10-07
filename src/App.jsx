@@ -66,17 +66,17 @@ function App() {
 
   const generateReadme = async () => {
     setIsGenerating(true);
-    
+
     // Simulate processing time for better UX
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     let markdown = '';
 
     // Header
     if (formData.name) {
       markdown += `# Hi there 👋, I'm ${formData.name}\n`;
     }
-    
+
     if (formData.tagline) {
       markdown += `### ${formData.tagline}\n\n`;
     }
@@ -143,15 +143,15 @@ function App() {
 
     // GitHub Stats
     markdown += `## 📊 GitHub Stats\n\n`;
-    
+
     if (formData.showStats) {
       markdown += `![GitHub Stats](https://github-readme-stats.vercel.app/api?username=YOUR_GITHUB_USERNAME&show_icons=true&theme=${formData.theme}&hide_border=true&count_private=true)\n\n`;
     }
-    
+
     if (formData.showStreak) {
       markdown += `![GitHub Streak](https://github-readme-streak-stats.herokuapp.com/?user=YOUR_GITHUB_USERNAME&theme=${formData.theme}&hide_border=true)\n\n`;
     }
-    
+
     if (formData.showTopLangs) {
       markdown += `![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=YOUR_GITHUB_USERNAME&layout=compact&theme=${formData.theme}&hide_border=true)\n\n`;
     }
@@ -192,7 +192,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <Toaster 
+      <Toaster
         position="top-right"
         toastOptions={{
           duration: 3000,
@@ -203,7 +203,7 @@ function App() {
           },
         }}
       />
-      
+
       {/* Enhanced Header */}
       <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 backdrop-blur-xl border-b border-white/10">
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
@@ -216,7 +216,7 @@ function App() {
               GitHub README Generator
             </h1>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Craft your perfect GitHub profile README with our intuitive generator. 
+              Craft your perfect GitHub profile README with our intuitive generator.
               <span className="block text-slate-400 text-lg mt-2">Stand out from the crowd in minutes! ✨</span>
             </p>
           </div>
@@ -234,14 +234,13 @@ function App() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center px-6 py-3 rounded-xl transition-all duration-300 whitespace-nowrap flex-1 justify-center min-w-0 ${
-                      activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25 transform scale-105'
+                    className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md'
                         : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
-                    }`}
+                      }`}
                   >
-                    <span className="mr-2 text-lg">{tab.icon}</span>
-                    <span className="font-semibold">{tab.label}</span>
+                    <span className="mr-2 text-sm">{tab.icon}</span>
+                    <span className="text-sm font-medium">{tab.label}</span>
                   </button>
                 ))}
               </div>
@@ -252,16 +251,16 @@ function App() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-slate-300 font-medium">Form Progress</span>
                 <span className="text-blue-400 font-bold">
-                  {Math.round((Object.values(formData).filter(val => 
+                  {Math.round((Object.values(formData).filter(val =>
                     Array.isArray(val) ? val.length > 0 : val.toString().length > 0
                   ).length / Object.keys(formData).length) * 100)}%
                 </span>
               </div>
               <div className="w-full bg-slate-700 rounded-full h-2">
-                <div 
+                <div
                   className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
                   style={{
-                    width: `${(Object.values(formData).filter(val => 
+                    width: `${(Object.values(formData).filter(val =>
                       Array.isArray(val) ? val.length > 0 : val.toString().length > 0
                     ).length / Object.keys(formData).length) * 100}%`
                   }}
@@ -292,9 +291,8 @@ function App() {
             <button
               onClick={generateReadme}
               disabled={isGenerating}
-              className={`w-full bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white font-bold py-5 px-6 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
-                isGenerating ? 'animate-pulse' : ''
-              }`}
+              className={`w-full bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white font-bold py-5 px-6 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${isGenerating ? 'animate-pulse' : ''
+                }`}
             >
               {isGenerating ? (
                 <div className="flex items-center justify-center space-x-3">
@@ -313,7 +311,7 @@ function App() {
 
           {/* Right Column - Preview */}
           <div className="xl:sticky xl:top-8">
-            <ReadmePreview 
+            <ReadmePreview
               readme={readme}
               copyToClipboard={copyToClipboard}
               downloadReadme={downloadReadme}
@@ -326,7 +324,7 @@ function App() {
       <div className="border-t border-slate-800 mt-12">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-slate-500 text-sm">
-            Made with ❤️ for the developer community • 
+            Made with ❤️ for the developer community •
             <span className="text-blue-400 ml-1">GitHub README Generator v1.0</span>
           </div>
         </div>
