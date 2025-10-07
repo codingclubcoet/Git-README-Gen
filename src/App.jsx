@@ -1,24 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import BasicInfoForm from './components/BasicInfoForm';
 import ActivitiesForm from './components/ActivitiesForm';
 import SocialLinksForm from './components/SocialLinksForm';
 import SkillsForm from './components/SkillsForm';
 import GithubStatsForm from './components/GithubStatsForm';
 import ReadmePreview from './components/ReadmePreview';
+import { Toaster, toast } from 'react-hot-toast';
 import './App.css';
 
 function App() {
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css';
-    document.head.appendChild(link);
-    
-    return () => {
-      document.head.removeChild(link);
-    };
-  }, []);
-
   const [formData, setFormData] = useState({
     name: '',
     tagline: '',
@@ -41,13 +31,15 @@ function App() {
   });
 
   const [readme, setReadme] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState('basic');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const skillsList = [
     'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'Go', 'Rust',
     'React', 'Vue', 'Angular', 'Node.js', 'Express', 'Django', 'Flask',
     'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Docker', 'Kubernetes',
-    'AWS', 'Azure', 'GCP', 'Git', 'Linux', 'HTML', 'CSS', 'TailwindCSS'
+    'AWS', 'Azure', 'GCP', 'Git', 'Linux', 'HTML', 'CSS', 'TailwindCSS',
+    'SASS', 'Next.js', 'GraphQL', 'Firebase', 'Jenkins', 'GitHub Actions'
   ];
 
   const themes = [
@@ -72,7 +64,12 @@ function App() {
     }));
   };
 
-  const generateReadme = () => {
+  const generateReadme = async () => {
+    setIsGenerating(true);
+    
+    // Simulate processing time for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     let markdown = '';
 
     // Header
@@ -165,12 +162,13 @@ function App() {
     markdown += `<p align="center">⭐️ From [YOUR_GITHUB_USERNAME](https://github.com/YOUR_GITHUB_USERNAME)</p>`;
 
     setReadme(markdown);
+    setIsGenerating(false);
+    toast.success('README generated successfully!');
   };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(readme);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    toast.success('Copied to clipboard!');
   };
 
   const downloadReadme = () => {
@@ -181,37 +179,156 @@ function App() {
     a.download = 'README.md';
     a.click();
     URL.revokeObjectURL(url);
+    toast.success('README downloaded!');
   };
 
+  const tabs = [
+    { id: 'basic', label: 'Basic Info', icon: '👤' },
+    { id: 'activities', label: 'Activities', icon: '🚀' },
+    { id: 'social', label: 'Social Links', icon: '🔗' },
+    { id: 'skills', label: 'Skills', icon: '🛠️' },
+    { id: 'github', label: 'GitHub Stats', icon: '📊' },
+  ];
+
   return (
-    <div className="container" style={{ padding: '2rem' }}>
-      <section className="hero is-info is-bold">
-        <div className="hero-body">
-          <p className="title">GitHub Profile README Generator</p>
-          <p className="subtitle">Create an awesome GitHub profile README in minutes!</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1e293b',
+            color: '#f8fafc',
+            border: '1px solid #334155'
+          },
+        }}
+      />
+      
+      {/* Enhanced Header */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 backdrop-blur-xl border-b border-white/10">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
+        <div className="container mx-auto px-4 py-8 relative">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
+              <span className="text-2xl">🚀</span>
+            </div>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+              GitHub README Generator
+            </h1>
+            <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              Craft your perfect GitHub profile README with our intuitive generator. 
+              <span className="block text-slate-400 text-lg mt-2">Stand out from the crowd in minutes! ✨</span>
+            </p>
+          </div>
         </div>
-      </section>
+      </div>
 
-      <div className="columns" style={{ marginTop: '2rem' }}>
-        <div className="column is-6">
-          <BasicInfoForm formData={formData} handleInputChange={handleInputChange} />
-          <ActivitiesForm formData={formData} handleInputChange={handleInputChange} />
-          <SocialLinksForm formData={formData} handleInputChange={handleInputChange} />
-          <SkillsForm formData={formData} toggleSkill={toggleSkill} skillsList={skillsList} />
-          <GithubStatsForm formData={formData} handleInputChange={handleInputChange} themes={themes} />
-          
-          <button className="button is-success is-fullwidth is-large" onClick={generateReadme}>
-            Generate README
-          </button>
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-7xl mx-auto">
+          {/* Left Column - Form */}
+          <div className="space-y-6">
+            {/* Enhanced Tab Navigation */}
+            <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl shadow-2xl border border-slate-700/50 p-2">
+              <div className="flex space-x-1 overflow-x-auto scrollbar-hide">
+                {tabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center px-6 py-3 rounded-xl transition-all duration-300 whitespace-nowrap flex-1 justify-center min-w-0 ${
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25 transform scale-105'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <span className="mr-2 text-lg">{tab.icon}</span>
+                    <span className="font-semibold">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Progress Indicator */}
+            <div className="bg-slate-800/30 backdrop-blur-lg rounded-2xl p-6 border border-slate-700/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-300 font-medium">Form Progress</span>
+                <span className="text-blue-400 font-bold">
+                  {Math.round((Object.values(formData).filter(val => 
+                    Array.isArray(val) ? val.length > 0 : val.toString().length > 0
+                  ).length / Object.keys(formData).length) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-slate-700 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${(Object.values(formData).filter(val => 
+                      Array.isArray(val) ? val.length > 0 : val.toString().length > 0
+                    ).length / Object.keys(formData).length) * 100}%`
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Form Sections */}
+            <div className="space-y-6">
+              {activeTab === 'basic' && (
+                <BasicInfoForm formData={formData} handleInputChange={handleInputChange} />
+              )}
+              {activeTab === 'activities' && (
+                <ActivitiesForm formData={formData} handleInputChange={handleInputChange} />
+              )}
+              {activeTab === 'social' && (
+                <SocialLinksForm formData={formData} handleInputChange={handleInputChange} />
+              )}
+              {activeTab === 'skills' && (
+                <SkillsForm formData={formData} toggleSkill={toggleSkill} skillsList={skillsList} />
+              )}
+              {activeTab === 'github' && (
+                <GithubStatsForm formData={formData} handleInputChange={handleInputChange} themes={themes} />
+              )}
+            </div>
+
+            {/* Enhanced Generate Button */}
+            <button
+              onClick={generateReadme}
+              disabled={isGenerating}
+              className={`w-full bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white font-bold py-5 px-6 rounded-2xl shadow-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                isGenerating ? 'animate-pulse' : ''
+              }`}
+            >
+              {isGenerating ? (
+                <div className="flex items-center justify-center space-x-3">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Generating README...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center space-x-3">
+                  <span className="text-xl">✨</span>
+                  <span className="text-lg">Generate README</span>
+                  <span className="text-xl">🚀</span>
+                </div>
+              )}
+            </button>
+          </div>
+
+          {/* Right Column - Preview */}
+          <div className="xl:sticky xl:top-8">
+            <ReadmePreview 
+              readme={readme}
+              copyToClipboard={copyToClipboard}
+              downloadReadme={downloadReadme}
+            />
+          </div>
         </div>
+      </div>
 
-        <div className="column is-6">
-          <ReadmePreview 
-            readme={readme}
-            copied={copied}
-            copyToClipboard={copyToClipboard}
-            downloadReadme={downloadReadme}
-          />
+      {/* Footer */}
+      <div className="border-t border-slate-800 mt-12">
+        <div className="container mx-auto px-4 py-6">
+          <div className="text-center text-slate-500 text-sm">
+            Made with ❤️ for the developer community • 
+            <span className="text-blue-400 ml-1">GitHub README Generator v1.0</span>
+          </div>
         </div>
       </div>
     </div>
